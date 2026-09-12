@@ -6,7 +6,11 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const { tipo, topico, textoUsuario, contextoEtapa, perguntaUsuario } = body;
 
-    const apiKey = process.env.GEMINI_API_KEY;
+    const apiKey =
+      process.env.GEMINI_API_KEY ||
+      process.env.GOOGLE_GENAI_API_KEY ||
+      process.env.GOOGLE_API_KEY ||
+      process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
     // Se a chave não estiver configurada no .env.local, retorna resposta inteligente pedagógica simulada
     if (!apiKey) {
@@ -58,6 +62,25 @@ export async function POST(req: NextRequest) {
         });
       }
 
+      if (tipo === "corrigir_redacao") {
+        return NextResponse.json({
+          mock: true,
+          notaC1: 160,
+          notaC2: 180,
+          notaC3: 160,
+          notaC4: 180,
+          notaC5: 160,
+          notaTotal: 840,
+          feedback: {
+            c1: "bom domínio da norma culta com pontuação adequada na introdução.",
+            c2: "tema compreendido com repertório sociocultural legitimado e produtivo.",
+            c3: "projeto de texto consistente, aprofundando a relação causa-efeito.",
+            c4: "boa diversidade de operadores argumentativos interparágrafos.",
+            c5: "proposta de intervenção completa com agente, ação, meio e detalhamento.",
+          },
+        });
+      }
+
       return NextResponse.json({
         mock: true,
         resposta: "Requisição processada em modo pedagógico de demonstração.",
@@ -66,6 +89,23 @@ export async function POST(req: NextRequest) {
 
     // Inicialização do SDK oficial do Google GenAI com a chave segura de backend
     const ai = new GoogleGenAI({ apiKey });
+
+    // Helper para gerar conteúdo com fallback automático entre modelos
+    const generateWithFallback = async (prompt: string, jsonMode: boolean = false) => {
+      try {
+        return await ai.models.generateContent({
+          model: "gemini-2.0-flash",
+          contents: prompt,
+          config: jsonMode ? { responseMimeType: "application/json" } : undefined,
+        });
+      } catch (err) {
+        return await ai.models.generateContent({
+          model: "gemini-1.5-flash",
+          contents: prompt,
+          config: jsonMode ? { responseMimeType: "application/json" } : undefined,
+        });
+      }
+    };
 
     if (tipo === "explain_feedback") {
       const prompt = `Você é a IA Tutora Pedagógica da plataforma "Trilha 1000", especialista em avaliação pelo método de Feynman e no ENEM.
@@ -82,14 +122,7 @@ Avalie a resposta com base em rigor conceitual e clareza. Retorne EXCLUSIVAMENTE
   "dicaPedagogica": string
 }`;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-        config: {
-          responseMimeType: "application/json",
-        },
-      });
-
+      const response = await generateWithFallback(prompt, true);
       const parsed = JSON.parse(response.text || "{}");
       return NextResponse.json(parsed);
     }
@@ -102,14 +135,42 @@ Dúvida do aluno: "${perguntaUsuario}".
 
 Responda de forma clara, didática, em no máximo 3 parágrafos curtos, usando analogias simples e destacando como o ENEM cobra esse conceito.`;
 
-      const response = await ai.models.generateContent({
-        model: "gemini-2.5-flash",
-        contents: prompt,
-      });
-
+      const response = await generateWithFallback(prompt, false);
       return NextResponse.json({
         resposta: response.text,
       });
+    }
+
+    if (tipo === "corrigir_redacao") {
+      const { tema, textoRedacao } = body;
+      const prompt = `Você é um corretor oficial da banca de redação do ENEM da plataforma Trilha 1000.
+Tema da proposta: "${tema}".
+Texto da redação do candidato:
+"""
+${textoRedacao}
+"""
+
+Avalie a redação rigorosamente com base nas 5 competências oficiais do ENEM (C1 a C5, cada uma variando de 0 a 200 em múltiplos de 40: 0, 40, 80, 120, 160, 200).
+Retorne EXCLUSIVAMENTE um objeto JSON no formato:
+{
+  "notaC1": number,
+  "notaC2": number,
+  "notaC3": number,
+  "notaC4": number,
+  "notaC5": number,
+  "notaTotal": number,
+  "feedback": {
+    "c1": string,
+    "c2": string,
+    "c3": string,
+    "c4": string,
+    "c5": string
+  }
+}`;
+
+      const response = await generateWithFallback(prompt, true);
+      const parsed = JSON.parse(response.text || "{}");
+      return NextResponse.json(parsed);
     }
 
     return NextResponse.json({ error: "Tipo de requisição inválido" }, { status: 400 });

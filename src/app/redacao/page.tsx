@@ -61,27 +61,22 @@ export default function RedacaoPage() {
     setCorrigindo(true);
 
     try {
-      await new Promise((r) => setTimeout(r, 1500));
+      const res = await fetch("/api/tutor", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          tipo: "corrigir_redacao",
+          tema,
+          textoRedacao,
+        }),
+      });
 
-      const mock = {
-        notaC1: 160,
-        notaC2: 180,
-        notaC3: 160,
-        notaC4: 180,
-        notaC5: 160,
-        notaTotal: 840,
-        feedback: {
-          c1: "bom domínio da norma culta. atenção a pequenos desvios de pontuação no 2º parágrafo.",
-          c2: "tema plenamente compreendido com repertório sociocultural legitimado e produtivo.",
-          c3: "projeto de texto consistente. aprofunde a relação de causa no segundo parágrafo de desenvolvimento.",
-          c4: "boa diversidade de operadores argumentativos interparágrafos.",
-          c5: "proposta de intervenção completa com agente, ação, meio, efeito e detalhamento.",
-        },
-      };
-
-      setResultadoCorrecao(mock);
+      if (res.ok) {
+        const data = await res.json();
+        setResultadoCorrecao(data);
+      }
     } catch (e) {
-      console.error(e);
+      console.error("Erro ao corrigir redação:", e);
     } finally {
       setCorrigindo(false);
     }
