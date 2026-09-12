@@ -7,18 +7,14 @@ import {
   CheckCircle2,
   Play,
   TrendingUp,
-  Award,
-  BookOpen,
-  ArrowRight,
   Layers,
   Activity,
   Square,
   BarChart3,
   Compass,
-  AlertCircle,
-  Sparkles,
+  ArrowRight,
 } from "lucide-react";
-import { TOPICOS_MATEMATICA, TopicoTrilha } from "@/lib/data/trilha-matematica";
+import { TOPICOS_MATEMATICA } from "@/lib/data/trilha-matematica";
 import { useStudy } from "@/lib/store/study-context";
 
 const iconMap: Record<string, React.ElementType> = {
@@ -41,86 +37,64 @@ export default function TrilhaMateriaPage({
 
   const topicos = TOPICOS_MATEMATICA;
 
-  // Separação pelas macro-fases da temporada
   const fases = [
     {
       chave: "fundacao",
-      nome: "1. Fundação (Base Essencial)",
-      descricao: "A base de raciocínio lógico e funções elementares. Domínio obrigatório de 70% para avançar.",
-      cor: "from-blue-500 to-cyan-500",
+      nome: "fundação (base essencial)",
+      descricao: "raciocínio algébrico e funções elementares. domínio mínimo de 70% para avançar.",
       topicos: topicos.filter((t) => t.faseTemporada === "fundacao"),
     },
     {
       chave: "consolidacao",
-      nome: "2. Consolidação (Maior Peso no ENEM)",
-      descricao: "Tópicos de altíssima incidência histórica. Intercalação pesada de geometria e estatística.",
-      cor: "from-violet-500 to-purple-500",
+      nome: "consolidação (maior peso no enem)",
+      descricao: "tópicos de alta incidência na prova com intercalação de conteúdos.",
       topicos: topicos.filter((t) => t.faseTemporada === "consolidacao"),
     },
     {
       chave: "intensivo",
-      nome: "3. Intensivo (Diferencial Competitivo)",
-      descricao: "Questões que elevam seu IP acima de 750 pontos na escala TRI.",
-      cor: "from-amber-500 to-orange-500",
+      nome: "intensivo (diferencial de pontuação)",
+      descricao: "conteúdos de maior complexidade para elevar seu índice acima de 750 pontos.",
       topicos: topicos.filter((t) => t.faseTemporada === "intensivo"),
     },
   ];
 
   return (
-    <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* Header da Trilha */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 rounded-3xl glass-panel border border-slate-800">
-        <div className="space-y-1">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-semibold">
-            <TrendingUp className="w-3.5 h-3.5" />
-            Skill Tree Visual • Matemática e suas Tecnologias
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            Trilha de Domínio: Matemática ENEM
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-400 max-w-2xl">
-            Cada nó abaixo é uma etapa com o <strong>Ciclo ATIVO</strong>. Você precisa de pelo
-            menos 70% de domínio em um pré-requisito para desbloquear a fase seguinte.
-          </p>
-        </div>
-
-        <div className="flex items-center gap-4 bg-slate-900/80 p-4 rounded-2xl border border-slate-800 shrink-0">
-          <div>
-            <span className="text-[11px] text-slate-400 block font-medium">Proficiência Atual</span>
-            <div className="flex items-baseline gap-1">
-              <span className="text-2xl font-black text-blue-400">
-                {proficiencias.matematica.toFixed(1)}
-              </span>
-              <span className="text-xs text-slate-400">/ 1000</span>
-            </div>
-          </div>
-          <div className="h-8 w-px bg-slate-800" />
-          <div>
-            <span className="text-[11px] text-slate-400 block font-medium">Progresso na Trilha</span>
-            <span className="text-2xl font-black text-white">2 / 6</span>
-          </div>
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-10 space-y-10">
+      {/* Cabeçalho da Trilha */}
+      <div className="space-y-2 border-b border-[#E5E1D8] dark:border-[#38352F] pb-6">
+        <span className="text-xs text-[#6B665C] dark:text-[#B5B0A4]">
+          trilha de estudo · matemática e suas tecnologias
+        </span>
+        <h1 className="font-serif text-3xl sm:text-4xl text-[#232019] dark:text-[#F1EEE7] font-normal">
+          matemática
+        </h1>
+        <div className="flex items-center gap-4 text-xs text-[#6B665C] dark:text-[#B5B0A4] pt-1">
+          <span>
+            índice atual:{" "}
+            <strong className="font-serif text-sm font-semibold text-[#232019] dark:text-[#F1EEE7]">
+              {proficiencias.matematica.toFixed(1).replace(".", ",")}
+            </strong>
+          </span>
+          <span>·</span>
+          <span>2 de 6 tópicos dominados</span>
         </div>
       </div>
 
-      {/* Árvore de Fases Conectadas */}
-      <div className="space-y-12 relative">
-        {fases.map((fase, idx) => (
-          <div key={fase.chave} className="space-y-4">
-            {/* Título da Macro-Fase */}
-            <div className="flex items-center gap-3">
-              <div
-                className={`w-3 h-8 rounded-full bg-gradient-to-b ${fase.cor} shadow-sm`}
-              />
-              <div>
-                <h2 className="text-lg font-bold text-white tracking-tight">{fase.nome}</h2>
-                <p className="text-xs text-slate-400">{fase.descricao}</p>
-              </div>
+      {/* Fases e Nós da Trilha */}
+      <div className="space-y-8">
+        {fases.map((fase) => (
+          <section key={fase.chave} className="space-y-3">
+            <div>
+              <h2 className="text-sm font-medium text-[#232019] dark:text-[#F1EEE7]">
+                {fase.nome}
+              </h2>
+              <p className="text-xs text-[#6B665C] dark:text-[#B5B0A4]">
+                {fase.descricao}
+              </p>
             </div>
 
-            {/* Grid dos Nós da Fase */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 relative">
+            <div className="bg-[#FFFFFF] dark:bg-[#242220] border border-[#E5E1D8] dark:border-[#38352F] rounded-xl divide-y divide-[#E5E1D8] dark:divide-[#38352F] overflow-hidden">
               {fase.topicos.map((topico) => {
-                const Icon = iconMap[topico.icone] || BookOpen;
                 const isBloqueado = topico.status === "bloqueado";
                 const isDominado = topico.status === "dominado";
                 const isDisponivel = topico.status === "disponivel";
@@ -128,100 +102,68 @@ export default function TrilhaMateriaPage({
                 return (
                   <div
                     key={topico.id}
-                    className={`relative rounded-2xl p-5 border transition-all duration-300 flex flex-col justify-between space-y-4 ${
-                      isBloqueado
-                        ? "bg-slate-950/40 border-slate-900 opacity-60 cursor-not-allowed"
-                        : isDominado
-                        ? "glass-panel border-emerald-500/30 hover:border-emerald-500/50 shadow-sm"
-                        : "glass-panel-glow border-violet-500/40 hover:border-violet-500/80 shadow-lg shadow-violet-950/30"
-                    }`}
+                    className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 hover:bg-[#F7F5F0]/40 dark:hover:bg-[#1C1A17]/30 transition-colors"
                   >
-                    {/* Topo do Card */}
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div
-                          className={`w-10 h-10 rounded-xl flex items-center justify-center border ${
-                            isBloqueado
-                              ? "bg-slate-900 border-slate-800 text-slate-400"
-                              : isDominado
-                              ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                              : "bg-violet-600/20 border-violet-500/40 text-violet-300"
-                          }`}
-                        >
-                          <Icon className="w-5 h-5" />
-                        </div>
+                    <div className="space-y-1 flex-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-[#6B665C] dark:text-[#B5B0A4]">
+                          etapa {topico.ordem}
+                        </span>
 
                         {isDominado && (
-                          <span className="flex items-center gap-1 text-[11px] font-semibold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-full">
-                            <CheckCircle2 className="w-3.5 h-3.5" />
-                            Dominado ({topico.porcentagemDominio}%)
+                          <span className="text-[11px] text-[#3D6FB4] font-medium">
+                            · dominado ({topico.porcentagemDominio}%)
                           </span>
                         )}
 
                         {isDisponivel && (
-                          <span className="flex items-center gap-1 text-[11px] font-semibold text-cyan-300 bg-cyan-500/15 border border-cyan-500/30 px-2.5 py-0.5 rounded-full animate-pulse">
-                            <Sparkles className="w-3.5 h-3.5 text-cyan-400" />
-                            Disponível Agora
+                          <span className="text-[11px] text-[#3D6FB4] font-medium">
+                            · disponível para estudo
                           </span>
                         )}
 
                         {isBloqueado && (
-                          <span className="flex items-center gap-1 text-[11px] font-medium text-slate-400 bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-full">
-                            <Lock className="w-3 h-3" />
-                            Bloqueado
+                          <span className="text-[11px] text-[#6B665C] dark:text-[#B5B0A4]">
+                            · bloqueado
                           </span>
                         )}
                       </div>
 
-                      <div>
-                        <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                          Etapa {topico.ordem} • Peso ENEM: {topico.pesoEnem}x
-                        </span>
-                        <h3 className="text-base font-bold text-white mt-0.5">{topico.nome}</h3>
-                      </div>
+                      <h3 className="text-sm font-medium text-[#232019] dark:text-[#F1EEE7]">
+                        {topico.nome}
+                      </h3>
 
-                      <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                      <p className="text-xs text-[#6B665C] dark:text-[#B5B0A4] line-clamp-1">
                         {topico.descricao}
                       </p>
                     </div>
 
-                    {/* Rodapé e CTA */}
-                    <div className="space-y-3 pt-3 border-t border-slate-800/80">
-                      {topico.preRequisitoNome && isBloqueado && (
-                        <div className="flex items-center gap-1.5 text-[11px] text-amber-400/90 bg-amber-500/10 p-2 rounded-lg border border-amber-500/20">
-                          <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                          <span>Requisito: {topico.preRequisitoNome}</span>
-                        </div>
-                      )}
-
-                      {/* Domínio & IP */}
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="text-slate-400">IP da Etapa:</span>
-                        <span className="font-bold text-slate-200">
-                          {topico.ipEstimado} pts
+                    <div className="flex items-center gap-4 shrink-0 justify-between sm:justify-end pt-2 sm:pt-0">
+                      <div className="text-right">
+                        <span className="text-[11px] text-[#6B665C] dark:text-[#B5B0A4] block">
+                          índice
+                        </span>
+                        <span className="font-serif text-sm text-[#232019] dark:text-[#F1EEE7]">
+                          {topico.ipEstimado}
                         </span>
                       </div>
 
-                      {/* Botão de Ação */}
                       {isBloqueado ? (
-                        <button
-                          disabled
-                          className="w-full py-2.5 rounded-xl bg-slate-900 text-slate-400 text-xs font-semibold cursor-not-allowed flex items-center justify-center gap-1.5"
-                        >
-                          <Lock className="w-3.5 h-3.5" />
-                          Bloqueado
-                        </button>
+                        <span className="inline-flex items-center gap-1 text-xs text-[#6B665C] dark:text-[#B5B0A4] px-3 py-1.5 rounded-lg border border-[#E5E1D8] dark:border-[#38352F] bg-[#F7F5F0] dark:bg-[#1C1A17] opacity-60">
+                          <Lock className="w-3 h-3" />
+                          bloqueado
+                        </span>
                       ) : (
                         <Link
                           href={`/trilha/matematica/${topico.slug}`}
-                          className={`w-full py-2.5 rounded-xl text-xs font-bold flex items-center justify-center gap-1.5 transition-all shadow-md ${
+                          className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium transition-colors ${
                             isDisponivel
-                              ? "bg-gradient-to-r from-violet-600 to-cyan-500 text-white hover:opacity-90 shadow-violet-600/20 hover:scale-[1.01]"
-                              : "bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700"
+                              ? "bg-[#3D6FB4] hover:bg-[#315891] text-[#FFFFFF]"
+                              : "border border-[#E5E1D8] dark:border-[#38352F] text-[#232019] dark:text-[#F1EEE7] hover:bg-[#F7F5F0] dark:hover:bg-[#1C1A17]"
                           }`}
                         >
-                          <Play className="w-3.5 h-3.5 fill-current" />
-                          {isDominado ? "Revisar Ciclo ATIVO" : "Iniciar Ciclo ATIVO"}
+                          <Play className="w-3 h-3 fill-current" />
+                          {isDominado ? "revisar etapa" : "iniciar etapa"}
                         </Link>
                       )}
                     </div>
@@ -229,7 +171,7 @@ export default function TrilhaMateriaPage({
                 );
               })}
             </div>
-          </div>
+          </section>
         ))}
       </div>
     </div>

@@ -1,22 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import Link from "next/link";
 import {
-  Timer,
-  Shield,
   Maximize2,
   Minimize2,
-  AlertTriangle,
   Play,
   Pause,
   RotateCcw,
-  CheckCircle2,
   ArrowRight,
-  Flame,
-  Brain,
-  ThumbsUp,
-  Sparkles,
 } from "lucide-react";
 import { useStudy } from "@/lib/store/study-context";
 
@@ -24,19 +15,15 @@ export default function ModoFortalezaPage() {
   const { sessaoFoco, iniciarModoFortaleza, encerrarModoFortaleza, registrarDistracao } =
     useStudy();
 
-  // Contrato de Intenção
   const [contratoPreenchido, setContratoPreenchido] = useState(false);
-  const [quando, setQuando] = useState("Agora (próximos 25 minutos)");
-  const [onde, setOnde] = useState("Na mesa de estudos sem o celular por perto");
-  const [oQue, setOQue] = useState("Ciclo ATIVO de Funções do 1º Grau (Matemática)");
+  const [quando, setQuando] = useState("agora (próximos 25 minutos)");
+  const [onde, setOnde] = useState("na mesa de estudos sem celular por perto");
+  const [oQue, setOQue] = useState("ciclo ativo de funções do 1º grau");
 
-  // Timer Pomodoro
   const [duracaoMinutos, setDuracaoMinutos] = useState(25);
   const [segundosRestantes, setSegundosRestantes] = useState(25 * 60);
   const [timerAtivo, setTimerAtivo] = useState(false);
   const [blocoConcluido, setBlocoConcluido] = useState(false);
-
-  // Fullscreen
   const [isFullscreen, setIsFullscreen] = useState(false);
 
   const toggleFullscreen = () => {
@@ -78,65 +65,61 @@ export default function ModoFortalezaPage() {
   const formatado = `${String(minutos).padStart(2, "0")}:${String(segundos).padStart(2, "0")}`;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-      {/* 1. SE O CONTRATO AINDA NÃO FOI CONFIRMADO */}
+    <div className="max-w-xl mx-auto px-4 sm:px-6 py-12 space-y-8">
       {!contratoPreenchido ? (
-        <section className="p-6 sm:p-8 rounded-3xl glass-panel-glow border border-violet-500/30 space-y-6">
-          <div className="space-y-2">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-violet-500/15 border border-violet-500/30 text-violet-300 text-xs font-semibold">
-              <Shield className="w-3.5 h-3.5 text-cyan-400" />
-              Modo Fortaleza • Intenção de Implementação (Gollwitzer)
-            </div>
-            <h1 className="text-2xl sm:text-3xl font-extrabold text-white">
-              Contrato de Foco Rápido (15 segundos)
+        <section className="bg-[#FFFFFF] dark:bg-[#242220] border border-[#E5E1D8] dark:border-[#38352F] rounded-xl p-6 sm:p-8 space-y-6">
+          <div className="space-y-1 border-b border-[#E5E1D8] dark:border-[#38352F] pb-4">
+            <span className="text-xs text-[#6B665C] dark:text-[#B5B0A4]">
+              intenção de implementação
+            </span>
+            <h1 className="font-serif text-2xl sm:text-3xl text-[#232019] dark:text-[#F1EEE7] font-normal">
+              modo fortaleza
             </h1>
-            <p className="text-xs sm:text-sm text-slate-300 leading-relaxed">
-              Metas vagas como "vou estudar hoje" falham pela inércia. Definir <strong>quando</strong>,{" "}
-              <strong>onde</strong> e <strong>o que exatamente</strong> quadruplica a probabilidade de
-              manter a concentração ininterrupta.
+            <p className="text-xs text-[#6B665C] dark:text-[#B5B0A4]">
+              um contrato rápido de 3 perguntas para eliminar a distração antes de começar.
             </p>
           </div>
 
           <div className="space-y-4">
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                1. Quando você vai focar?
+            <div className="space-y-1">
+              <label className="text-xs text-[#6B665C] dark:text-[#B5B0A4]">
+                quando você vai estudar?
               </label>
               <input
                 type="text"
                 value={quando}
                 onChange={(e) => setQuando(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 focus:outline-none focus:border-violet-500"
+                className="w-full bg-[#F7F5F0] dark:bg-[#1C1A17] border border-[#E5E1D8] dark:border-[#38352F] rounded-lg px-3 py-2 text-xs text-[#232019] dark:text-[#F1EEE7] focus:outline-none focus:border-[#3D6FB4]"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                2. Onde será o estudo?
+            <div className="space-y-1">
+              <label className="text-xs text-[#6B665C] dark:text-[#B5B0A4]">
+                onde será o estudo?
               </label>
               <input
                 type="text"
                 value={onde}
                 onChange={(e) => setOnde(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 focus:outline-none focus:border-violet-500"
+                className="w-full bg-[#F7F5F0] dark:bg-[#1C1A17] border border-[#E5E1D8] dark:border-[#38352F] rounded-lg px-3 py-2 text-xs text-[#232019] dark:text-[#F1EEE7] focus:outline-none focus:border-[#3D6FB4]"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                3. O que exatamente será estudado?
+            <div className="space-y-1">
+              <label className="text-xs text-[#6B665C] dark:text-[#B5B0A4]">
+                o que exatamente será estudado?
               </label>
               <input
                 type="text"
                 value={oQue}
                 onChange={(e) => setOQue(e.target.value)}
-                className="w-full bg-slate-900 border border-slate-800 rounded-xl px-4 py-3 text-sm text-slate-100 focus:outline-none focus:border-violet-500"
+                className="w-full bg-[#F7F5F0] dark:bg-[#1C1A17] border border-[#E5E1D8] dark:border-[#38352F] rounded-lg px-3 py-2 text-xs text-[#232019] dark:text-[#F1EEE7] focus:outline-none focus:border-[#3D6FB4]"
               />
             </div>
 
-            <div className="space-y-1.5">
-              <label className="text-xs font-bold text-slate-300 uppercase tracking-wider">
-                Duração do Bloco Pomodoro Adaptativo:
+            <div className="space-y-1.5 pt-1">
+              <label className="text-xs text-[#6B665C] dark:text-[#B5B0A4]">
+                duração do bloco pomodoro:
               </label>
               <div className="flex gap-2">
                 {[15, 25, 50].map((m) => (
@@ -147,13 +130,13 @@ export default function ModoFortalezaPage() {
                       setDuracaoMinutos(m);
                       setSegundosRestantes(m * 60);
                     }}
-                    className={`flex-1 py-2.5 rounded-xl text-xs font-bold border transition ${
+                    className={`flex-1 py-2 rounded-lg text-xs transition-colors border ${
                       duracaoMinutos === m
-                        ? "bg-violet-600 text-white border-violet-500 shadow-md"
-                        : "bg-slate-900 text-slate-400 border-slate-800 hover:bg-slate-800"
+                        ? "bg-[#3D6FB4] text-white border-[#3D6FB4]"
+                        : "bg-[#F7F5F0] dark:bg-[#1C1A17] text-[#6B665C] dark:text-[#B5B0A4] border-[#E5E1D8] dark:border-[#38352F]"
                     }`}
                   >
-                    {m} minutos {m === 25 && "(Padrão)"} {m === 15 && "(Retomada Leve)"} {m === 50 && "(Denso)"}
+                    {m} min
                   </button>
                 ))}
               </div>
@@ -162,116 +145,95 @@ export default function ModoFortalezaPage() {
 
           <button
             onClick={handleIniciarSessao}
-            className="w-full py-3.5 rounded-2xl bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 text-white font-bold text-sm shadow-xl shadow-violet-600/30 hover:scale-[1.01] active:scale-[0.99] transition flex items-center justify-center gap-2"
+            className="w-full py-2.5 rounded-lg bg-[#3D6FB4] hover:bg-[#315891] text-[#FFFFFF] text-xs font-medium transition-colors flex items-center justify-center gap-2"
           >
-            Assinar Contrato e Entrar na Fortaleza
-            <ArrowRight className="w-4 h-4" />
+            entrar no modo foco
+            <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </section>
       ) : (
-        /* 2. DENTRO DA FORTALEZA: TIMER + BOTÃO FUI DISTRAÍDO */
-        <section className="p-8 rounded-3xl glass-panel-glow border border-violet-500/40 text-center space-y-8 relative overflow-hidden">
-          {/* Header da Sessão Ativa */}
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2 text-xs text-slate-400">
-              <Shield className="w-4 h-4 text-emerald-400" />
-              <span>Ambiente Protegido Contra Distrações</span>
-            </div>
-
+        <section className="bg-[#FFFFFF] dark:bg-[#242220] border border-[#E5E1D8] dark:border-[#38352F] rounded-xl p-8 text-center space-y-8">
+          <div className="flex items-center justify-between text-xs text-[#6B665C] dark:text-[#B5B0A4]">
+            <span>bloco de foco em andamento</span>
             <button
               onClick={toggleFullscreen}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 hover:bg-slate-800 transition"
+              className="inline-flex items-center gap-1 hover:text-[#232019] dark:hover:text-[#F1EEE7]"
             >
               {isFullscreen ? (
                 <>
-                  <Minimize2 className="w-3.5 h-3.5" /> Sair da Tela Cheia
+                  <Minimize2 className="w-3 h-3" /> sair da tela cheia
                 </>
               ) : (
                 <>
-                  <Maximize2 className="w-3.5 h-3.5" /> Tela Cheia Imersiva
+                  <Maximize2 className="w-3 h-3" /> tela cheia
                 </>
               )}
             </button>
           </div>
 
-          {/* O QUE ESTOU ESTUDANDO */}
-          <div className="p-4 rounded-2xl bg-slate-900/80 border border-slate-800 max-w-md mx-auto">
-            <span className="text-[10px] text-violet-400 font-bold uppercase tracking-wider block">
-              Foco Atual
+          <div className="space-y-1">
+            <span className="text-xs text-[#6B665C] dark:text-[#B5B0A4]">
+              estudando agora:
             </span>
-            <p className="text-sm font-bold text-white mt-0.5">{oQue}</p>
+            <h2 className="text-sm font-medium text-[#232019] dark:text-[#F1EEE7]">
+              {oQue}
+            </h2>
           </div>
 
-          {/* TIMER GIGANTE */}
-          <div className="space-y-4">
-            <div className="text-6xl sm:text-8xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white via-slate-100 to-slate-400 font-mono tracking-tight drop-shadow-lg">
-              {formatado}
-            </div>
-
-            {/* Controles do Timer */}
-            <div className="flex items-center justify-center gap-3">
-              <button
-                onClick={() => setTimerAtivo(!timerAtivo)}
-                className="px-6 py-3 rounded-2xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-violet-600/30 transition"
-              >
-                {timerAtivo ? (
-                  <>
-                    <Pause className="w-4 h-4" /> Pausar
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-4 h-4" /> Continuar
-                  </>
-                )}
-              </button>
-
-              <button
-                onClick={() => {
-                  setTimerAtivo(false);
-                  setSegundosRestantes(duracaoMinutos * 60);
-                }}
-                className="p-3 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition"
-              >
-                <RotateCcw className="w-4 h-4" />
-              </button>
-            </div>
+          {/* Timer em fonte Fraunces Serifada */}
+          <div className="font-serif text-7xl sm:text-8xl text-[#232019] dark:text-[#F1EEE7] font-normal tracking-tight">
+            {formatado}
           </div>
 
-          {/* BOTÃO "FUI DISTRAÍDO" (SEM CULPA, COM DADO) */}
-          <div className="pt-6 border-t border-slate-800/80 max-w-md mx-auto space-y-3">
-            <div className="space-y-1">
-              <span className="text-xs text-slate-400">
-                Se desconcentrou? Não se culpe. Transforme em dado:
-              </span>
-            </div>
+          <div className="flex items-center justify-center gap-3">
+            <button
+              onClick={() => setTimerAtivo(!timerAtivo)}
+              className="px-5 py-2 rounded-lg bg-[#3D6FB4] hover:bg-[#315891] text-[#FFFFFF] text-xs font-medium transition-colors inline-flex items-center gap-1.5"
+            >
+              {timerAtivo ? (
+                <>
+                  <Pause className="w-3.5 h-3.5" /> pausar
+                </>
+              ) : (
+                <>
+                  <Play className="w-3.5 h-3.5 fill-current" /> continuar
+                </>
+              )}
+            </button>
 
             <button
-              onClick={() => registrarDistracao("Distração rápida")}
-              className="w-full py-3 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 text-xs font-bold border border-amber-500/30 transition flex items-center justify-center gap-2"
+              onClick={() => {
+                setTimerAtivo(false);
+                setSegundosRestantes(duracaoMinutos * 60);
+              }}
+              className="p-2 rounded-lg border border-[#E5E1D8] dark:border-[#38352F] text-[#6B665C] dark:text-[#B5B0A4] hover:text-[#232019] dark:hover:text-[#F1EEE7] transition-colors"
             >
-              <AlertTriangle className="w-4 h-4" />
-              Registrar: Fui Distraído (1 clique)
+              <RotateCcw className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {/* Botão de Registro de Distração sem Culpa */}
+          <div className="pt-6 border-t border-[#E5E1D8] dark:border-[#38352F] space-y-2">
+            <button
+              onClick={() => registrarDistracao("distração registrada")}
+              className="text-xs text-[#6B665C] dark:text-[#B5B0A4] hover:text-[#232019] dark:hover:text-[#F1EEE7] underline"
+            >
+              fui distraído (registrar sem julgamento)
             </button>
 
             {sessaoFoco.distracoes.length > 0 && (
-              <p className="text-[11px] text-slate-400">
-                {sessaoFoco.distracoes.length} distração(ões) registrada(s) nesta sessão. O painel
-                analítico usará isso para calibrar seus horários mais produtivos.
+              <p className="text-[11px] text-[#6B665C] dark:text-[#B5B0A4]">
+                {sessaoFoco.distracoes.length} distração(ões) registrada(s) nesta sessão.
               </p>
             )}
           </div>
 
-          {/* AVALIAÇÃO DO BLOCO APÓS TÉRMINO */}
           {blocoConcluido && (
-            <div className="p-6 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 space-y-4 animate-fade-in">
-              <div className="flex items-center justify-center gap-2 text-emerald-300 font-bold text-base">
-                <CheckCircle2 className="w-5 h-5 text-emerald-400" />
-                Bloco de {duracaoMinutos} minutos concluído!
-              </div>
-              <p className="text-xs text-slate-300">
-                Avaliação de 1 clique: esse bloco valeu a pena para sua evolução?
+            <div className="p-4 bg-[#F7F5F0] dark:bg-[#1C1A17] rounded-lg space-y-2 text-xs">
+              <p className="font-medium text-[#232019] dark:text-[#F1EEE7]">
+                bloco concluído. esse bloco valeu a pena para você?
               </p>
-              <div className="flex justify-center gap-2">
+              <div className="flex justify-center gap-1.5">
                 {[1, 2, 3, 4, 5].map((estrela) => (
                   <button
                     key={estrela}
@@ -280,9 +242,9 @@ export default function ModoFortalezaPage() {
                       setContratoPreenchido(false);
                       setBlocoConcluido(false);
                     }}
-                    className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-800 hover:border-emerald-500 text-xs font-bold text-white transition flex items-center justify-center"
+                    className="w-7 h-7 rounded border border-[#E5E1D8] dark:border-[#38352F] hover:border-[#3D6FB4] text-xs font-serif text-[#232019] dark:text-[#F1EEE7]"
                   >
-                    {estrela}★
+                    {estrela}
                   </button>
                 ))}
               </div>
@@ -295,9 +257,9 @@ export default function ModoFortalezaPage() {
                 encerrarModoFortaleza();
                 setContratoPreenchido(false);
               }}
-              className="text-xs text-slate-400 hover:text-slate-300 underline"
+              className="text-xs text-[#6B665C] dark:text-[#B5B0A4] hover:underline"
             >
-              Encerrar Sessão da Fortaleza
+              encerrar sessão
             </button>
           </div>
         </section>

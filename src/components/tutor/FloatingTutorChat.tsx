@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Sparkles, X, Send, Bot, MessageSquare, HelpCircle, Loader2 } from "lucide-react";
+import { X, Send, MessageSquare, Loader2 } from "lucide-react";
 
 interface FloatingTutorChatProps {
   topicoNome?: string;
@@ -9,8 +9,8 @@ interface FloatingTutorChatProps {
 }
 
 export function FloatingTutorChat({
-  topicoNome = "Funções do 1º Grau",
-  contextoEtapa = "Matemática e suas Tecnologias - Taxa de variação e equações de reta no ENEM",
+  topicoNome = "Funções do 1º grau",
+  contextoEtapa = "Matemática e suas tecnologias - Taxa de variação e equações de reta no Enem",
 }: FloatingTutorChatProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [pergunta, setPergunta] = useState("");
@@ -20,15 +20,15 @@ export function FloatingTutorChat({
   >([
     {
       sender: "tutor",
-      texto: `Olá! Sou a sua **IA Tutora** do Trilha 1000. Estou acompanhando sua sessão sobre **${topicoNome}**. Tem alguma dúvida sobre o conceito, gráficos ou quer entender o distrator de alguma questão? É só me perguntar!`,
+      texto: `Olá. Sou o tutor de apoio da Trilha 1000. Estou acompanhando sua sessão sobre ${topicoNome}. Tem alguma dúvida conceitual ou quer revisar alguma alternativa? Pode perguntar.`,
       timestamp: new Date().toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" }),
     },
   ]);
 
   const quickPrompts = [
-    "Qual a pegadinha clássica do ENEM sobre reta?",
-    "Como saber rapidamente se a função é crescente?",
-    "Me dê um exemplo de questão com táxi ou app.",
+    "qual o padrão mais comum do enem nesse assunto?",
+    "como identificar o coeficiente angular no gráfico?",
+    "me dê um exemplo prático de aplicação.",
   ];
 
   const handleEnviar = async (textoParaEnviar?: string) => {
@@ -86,94 +86,78 @@ export function FloatingTutorChat({
 
   return (
     <>
-      {/* Botão Flutuante */}
+      {/* Botão Flutuante Minimalista */}
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 z-50 flex items-center gap-2.5 px-4 py-3 rounded-full bg-gradient-to-r from-violet-600 via-indigo-600 to-cyan-500 text-white font-medium shadow-xl shadow-violet-600/30 hover:shadow-violet-600/50 hover:scale-105 active:scale-95 transition-all duration-200"
+          className="fixed bottom-6 right-6 z-40 flex items-center gap-2 px-3.5 py-2.5 rounded-full bg-[#3D6FB4] hover:bg-[#315891] text-[#FFFFFF] text-xs font-medium transition-colors shadow-sm"
         >
-          <Sparkles className="w-5 h-5 text-cyan-200 animate-pulse" />
-          <span className="text-sm font-semibold tracking-wide">Tutor Gemini</span>
-          <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+          <MessageSquare className="w-4 h-4" />
+          <span>tutor</span>
         </button>
       )}
 
-      {/* Janela de Conversa */}
+      {/* Janela de Conversa Editorial */}
       {isOpen && (
-        <div className="fixed bottom-6 right-6 z-50 w-[92vw] sm:w-[420px] h-[580px] rounded-2xl glass-panel-glow flex flex-col overflow-hidden shadow-2xl border border-violet-500/30">
+        <div className="fixed bottom-6 right-6 z-50 w-[92vw] sm:w-[380px] h-[520px] rounded-xl bg-[#FFFFFF] dark:bg-[#242220] border border-[#E5E1D8] dark:border-[#38352F] flex flex-col overflow-hidden shadow-sm">
           {/* Header */}
-          <div className="p-4 bg-slate-900/90 border-b border-slate-800 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-cyan-500 p-0.5 shadow-md">
-                <div className="w-full h-full bg-slate-950 rounded-[10px] flex items-center justify-center">
-                  <Bot className="w-5 h-5 text-cyan-400" />
-                </div>
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <h3 className="text-sm font-bold text-slate-100">Tutor Trilha 1000</h3>
-                  <span className="px-1.5 py-0.5 rounded text-[10px] font-semibold bg-cyan-500/10 text-cyan-300 border border-cyan-500/20">
-                    Gemini
-                  </span>
-                </div>
-                <p className="text-[11px] text-slate-400 truncate max-w-[200px]">
-                  Contexto: {topicoNome}
-                </p>
-              </div>
+          <div className="px-4 py-3 border-b border-[#E5E1D8] dark:border-[#38352F] flex items-center justify-between">
+            <div>
+              <h3 className="text-xs font-semibold text-[#232019] dark:text-[#F1EEE7]">
+                tutor de estudo
+              </h3>
+              <p className="text-[11px] text-[#6B665C] dark:text-[#B5B0A4] truncate max-w-[240px]">
+                {topicoNome}
+              </p>
             </div>
             <button
               onClick={() => setIsOpen(false)}
-              className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition"
+              className="text-[#6B665C] dark:text-[#B5B0A4] hover:text-[#232019] dark:hover:text-[#F1EEE7] p-1"
             >
-              <X className="w-5 h-5" />
+              <X className="w-4 h-4" />
             </button>
           </div>
 
           {/* Área de Mensagens */}
-          <div className="flex-1 p-4 overflow-y-auto space-y-3.5 text-sm bg-slate-950/60">
+          <div className="flex-1 p-4 overflow-y-auto space-y-3 text-xs bg-[#F7F5F0]/30 dark:bg-[#1C1A17]/30">
             {mensagens.map((msg, idx) => (
               <div
                 key={idx}
-                className={`flex gap-2.5 ${
-                  msg.sender === "user" ? "justify-end" : "justify-start"
+                className={`flex flex-col ${
+                  msg.sender === "user" ? "items-end" : "items-start"
                 }`}
               >
-                {msg.sender === "tutor" && (
-                  <div className="w-7 h-7 rounded-lg bg-violet-600/30 border border-violet-500/40 flex items-center justify-center shrink-0 mt-0.5">
-                    <Sparkles className="w-3.5 h-3.5 text-violet-300" />
-                  </div>
-                )}
                 <div
-                  className={`max-w-[82%] rounded-2xl px-3.5 py-2.5 shadow-sm leading-relaxed ${
+                  className={`max-w-[85%] rounded-lg px-3 py-2 text-xs leading-relaxed ${
                     msg.sender === "user"
-                      ? "bg-gradient-to-r from-violet-600 to-indigo-600 text-white rounded-br-none"
-                      : "bg-slate-900/90 text-slate-200 border border-slate-800 rounded-bl-none"
+                      ? "bg-[#3D6FB4] text-[#FFFFFF]"
+                      : "bg-[#FFFFFF] dark:bg-[#242220] text-[#232019] dark:text-[#F1EEE7] border border-[#E5E1D8] dark:border-[#38352F]"
                   }`}
                 >
-                  <p className="whitespace-pre-line text-xs sm:text-sm">{msg.texto}</p>
-                  <span className="block text-[10px] text-slate-400 mt-1 text-right">
-                    {msg.timestamp}
-                  </span>
+                  <p className="whitespace-pre-line">{msg.texto}</p>
                 </div>
+                <span className="text-[10px] text-[#6B665C] dark:text-[#B5B0A4] mt-1 px-1">
+                  {msg.timestamp}
+                </span>
               </div>
             ))}
 
             {loading && (
-              <div className="flex gap-2.5 items-center text-slate-400 text-xs py-2">
-                <Loader2 className="w-4 h-4 text-cyan-400 animate-spin" />
-                <span>O Tutor Gemini está analisando sua pergunta...</span>
+              <div className="flex items-center gap-2 text-[#6B665C] dark:text-[#B5B0A4] text-xs py-2">
+                <Loader2 className="w-3.5 h-3.5 animate-spin text-[#3D6FB4]" />
+                <span>consultando tutor...</span>
               </div>
             )}
           </div>
 
           {/* Sugestões Rápidas */}
-          <div className="px-3 py-2 bg-slate-900/70 border-t border-slate-800/80 flex gap-1.5 overflow-x-auto">
+          <div className="px-3 py-2 border-t border-[#E5E1D8] dark:border-[#38352F] flex gap-1.5 overflow-x-auto bg-[#FFFFFF] dark:bg-[#242220]">
             {quickPrompts.map((prompt, i) => (
               <button
                 key={i}
                 onClick={() => handleEnviar(prompt)}
                 disabled={loading}
-                className="shrink-0 text-[11px] px-2.5 py-1 rounded-full bg-slate-800/90 text-slate-300 hover:text-white hover:bg-violet-600/30 border border-slate-700/60 transition"
+                className="shrink-0 text-[11px] px-2.5 py-1 rounded-md bg-[#F7F5F0] dark:bg-[#1C1A17] text-[#6B665C] dark:text-[#B5B0A4] hover:text-[#232019] dark:hover:text-[#F1EEE7] border border-[#E5E1D8] dark:border-[#38352F] transition-colors"
               >
                 {prompt}
               </button>
@@ -181,21 +165,21 @@ export function FloatingTutorChat({
           </div>
 
           {/* Input de Mensagem */}
-          <div className="p-3 bg-slate-900/95 border-t border-slate-800 flex items-center gap-2">
+          <div className="p-3 border-t border-[#E5E1D8] dark:border-[#38352F] flex items-center gap-2 bg-[#FFFFFF] dark:bg-[#242220]">
             <input
               type="text"
               value={pergunta}
               onChange={(e) => setPergunta(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleEnviar()}
-              placeholder="Pergunte qualquer dúvida da aula..."
-              className="flex-1 bg-slate-950 border border-slate-800 focus:border-violet-500 rounded-xl px-3.5 py-2 text-xs sm:text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-violet-500"
+              placeholder="digite sua dúvida..."
+              className="flex-1 bg-[#F7F5F0] dark:bg-[#1C1A17] border border-[#E5E1D8] dark:border-[#38352F] rounded-lg px-3 py-1.5 text-xs text-[#232019] dark:text-[#F1EEE7] placeholder-[#6B665C] dark:placeholder-[#B5B0A4] focus:outline-none focus:border-[#3D6FB4]"
             />
             <button
               onClick={() => handleEnviar()}
               disabled={!pergunta.trim() || loading}
-              className="p-2.5 rounded-xl bg-violet-600 text-white hover:bg-violet-500 disabled:opacity-50 disabled:cursor-not-allowed transition shadow-md shadow-violet-600/20"
+              className="p-2 rounded-lg bg-[#3D6FB4] text-white hover:bg-[#315891] disabled:opacity-40 transition-colors"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>

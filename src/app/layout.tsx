@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, Outfit } from "next/font/google";
+import { Inter, Fraunces } from "next/font/google";
 import "./globals.css";
 import { StudyProvider } from "@/lib/store/study-context";
 import { Navbar } from "@/components/layout/Navbar";
@@ -8,28 +8,19 @@ import { FloatingTutorChat } from "@/components/tutor/FloatingTutorChat";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
 });
 
-const outfit = Outfit({
-  variable: "--font-outfit",
+const fraunces = Fraunces({
+  variable: "--font-fraunces",
   subsets: ["latin"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "Trilha 1000 — O Caminho Científico para a Nota 1000 no ENEM",
+  title: "Trilha 1000 — O caminho científico para a nota 1000 no Enem",
   description:
-    "Plataforma de estudos para o ENEM baseada em ciência da aprendizagem (Retrieval Practice, SM-2, Ciclo ATIVO), Modo Fortaleza anti-procrastinação e tutoria por IA com Google Gemini.",
-  keywords: [
-    "ENEM",
-    "Estudos ENEM",
-    "Nota 1000",
-    "Redação Nota 1000",
-    "Ciclo ATIVO",
-    "Repetição Espaçada",
-    "Matemática ENEM",
-    "Medicina SISU",
-  ],
-  authors: [{ name: "Trilha 1000 Team" }],
+    "Plataforma de estudos para o Enem baseada em ciência cognitiva, repetição espaçada SM-2 e tutoria com IA.",
 };
 
 export default function RootLayout({
@@ -38,8 +29,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="pt-BR" className={`${inter.variable} ${outfit.variable} dark h-full`}>
-      <body className="min-h-full flex flex-col bg-[#080c14] text-slate-100 selection:bg-violet-500/30 selection:text-violet-200">
+    <html
+      lang="pt-BR"
+      className={`${inter.variable} ${fraunces.variable} h-full`}
+    >
+      <body className="min-h-full flex flex-col font-sans antialiased text-[#232019] dark:text-[#F1EEE7] bg-[#F7F5F0] dark:bg-[#1C1A17] transition-colors duration-150">
         <StudyProvider>
           <Navbar />
           <main className="flex-1 flex flex-col">{children}</main>
