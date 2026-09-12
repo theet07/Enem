@@ -13,7 +13,7 @@ import {
 import { useStudy } from "@/lib/store/study-context";
 
 export default function DashboardPage() {
-  const { profile, proficiencias, notaEstimadaEnem, gapParaCorte } = useStudy();
+  const { profile, proficiencias, notaEstimadaEnem, gapParaCorte, topicoProgresso } = useStudy();
 
   const materias = [
     {
@@ -57,6 +57,17 @@ export default function DashboardPage() {
   const progressoPercent = Math.min(100, Math.max(0, (notaEstimadaEnem / 1000) * 100));
   const cortePercent = Math.min(100, Math.max(0, (profile.notaCorteAlvo / 1000) * 100));
 
+  const topicosEmRevisao = Object.values(topicoProgresso).filter(
+    (t) => t.faseAtual === "concluido" || (t.sm2Data && t.sm2Data.repeticoes > 0)
+  ).length;
+
+  const revisaoTexto =
+    topicosEmRevisao === 0
+      ? "nenhum tópico na fila de revisão"
+      : topicosEmRevisao === 1
+      ? "1 tópico na fila de revisão"
+      : `${topicosEmRevisao} tópicos na fila de revisão`;
+
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-12 space-y-12">
       {/* 1. TOPO: NOTA ESTIMADA, FRASE CURTA E BARRA FINA COM MARCADORES */}
@@ -70,13 +81,23 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        <p className="text-sm text-[#6B665C] dark:text-[#B5B0A4] leading-relaxed">
-          faltam {gapParaCorte.toFixed(1).replace(".", ",")} pontos para a meta de{" "}
-          <strong className="font-medium text-[#232019] dark:text-[#F1EEE7]">
-            {profile.cursoAlvo}
-          </strong>{" "}
-          ({profile.notaCorteAlvo.toFixed(1).replace(".", ",")} na {profile.universidadeAlvo})
-        </p>
+        {notaEstimadaEnem === 0 ? (
+          <p className="text-sm text-[#6B665C] dark:text-[#B5B0A4] leading-relaxed">
+            complete sua primeira etapa de estudo para calibrar sua nota estimada · meta:{" "}
+            <strong className="font-medium text-[#232019] dark:text-[#F1EEE7]">
+              {profile.cursoAlvo}
+            </strong>{" "}
+            ({profile.notaCorteAlvo.toFixed(1).replace(".", ",")} na {profile.universidadeAlvo})
+          </p>
+        ) : (
+          <p className="text-sm text-[#6B665C] dark:text-[#B5B0A4] leading-relaxed">
+            faltam {gapParaCorte.toFixed(1).replace(".", ",")} pontos para a meta de{" "}
+            <strong className="font-medium text-[#232019] dark:text-[#F1EEE7]">
+              {profile.cursoAlvo}
+            </strong>{" "}
+            ({profile.notaCorteAlvo.toFixed(1).replace(".", ",")} na {profile.universidadeAlvo})
+          </p>
+        )}
 
         {/* Barra de progresso fina única em #3D6FB4 com marcadores discretos */}
         <div className="pt-2 space-y-2">
@@ -191,10 +212,10 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* 4. RODAPÉ DISCRETO (SEM EMOJI, SEM MEDALHAS OU SELOS CHAMATIVOS) */}
+      {/* 4. RODAPÉ DISCRETO */}
       <footer className="pt-4 border-t border-[#E5E1D8] dark:border-[#38352F] text-center">
         <p className="text-xs text-[#6B665C] dark:text-[#B5B0A4]">
-          {profile.streakDias} dias de estudo seguidos · 1 tópico na fila de revisão
+          {profile.streakDias} {profile.streakDias === 1 ? "dia" : "dias"} de estudo seguidos · {revisaoTexto}
         </p>
       </footer>
     </div>

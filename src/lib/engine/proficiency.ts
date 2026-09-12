@@ -58,6 +58,20 @@ export function atualizarIP({
   const resultadoReal = acertou ? 1 : 0;
   const k = obterKFactor(questoesRespondidasNoTopico);
 
+  // Calibração inicial ao sair do zero absoluto (primeiro diagnóstico)
+  if (ipAtual === 0 && questoesRespondidasNoTopico === 0) {
+    const ipInicial = acertou
+      ? Math.max(480, dificuldadeQuestao - 40)
+      : Math.max(350, dificuldadeQuestao - 140);
+    const rounded = Math.round(ipInicial * 10) / 10;
+    return {
+      novoIP: rounded,
+      delta: rounded,
+      probabilidadeEsperada: Math.round(probEsperada * 100) / 100,
+      kFactorUsado: k,
+    };
+  }
+
   const delta = k * (resultadoReal - probEsperada);
   let novoIP = ipAtual + delta;
 

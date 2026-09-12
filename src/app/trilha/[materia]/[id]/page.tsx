@@ -40,7 +40,7 @@ export default function CicloAtivoPage({
     etapaId: etapa.id,
     topicoSlug: etapa.topicoSlug,
     faseAtual: "A",
-    ipAtual: 540,
+    ipAtual: 0,
     questoesRespondidas: 0,
     respostasAtivacao: {},
     respostasVerificacao: {},
@@ -663,7 +663,7 @@ export default function CicloAtivoPage({
                 próxima revisão
               </span>
               <span className="text-xs font-medium text-[#232019] dark:text-[#F1EEE7]">
-                em 2 dias (sm-2)
+                em {progresso.sm2Data?.intervaloDias || 1} dia(s) (sm-2)
               </span>
             </div>
           </div>

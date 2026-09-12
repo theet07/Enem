@@ -33,9 +33,13 @@ export default function TrilhaMateriaPage({
 }) {
   const resolvedParams = use(params);
   const { materia } = resolvedParams;
-  const { proficiencias } = useStudy();
+  const { proficiencias, topicoProgresso } = useStudy();
 
   const topicos = TOPICOS_MATEMATICA;
+
+  const topicosDominadosCount = Object.values(topicoProgresso).filter(
+    (t) => t.faseAtual === "concluido" || t.ipAtual >= 700
+  ).length;
 
   const fases = [
     {
@@ -76,7 +80,7 @@ export default function TrilhaMateriaPage({
             </strong>
           </span>
           <span>·</span>
-          <span>2 de 6 tópicos dominados</span>
+          <span>{topicosDominadosCount} de {topicos.length} tópicos dominados</span>
         </div>
       </div>
 
@@ -95,9 +99,13 @@ export default function TrilhaMateriaPage({
 
             <div className="bg-[#FFFFFF] dark:bg-[#242220] border border-[#E5E1D8] dark:border-[#38352F] rounded-xl divide-y divide-[#E5E1D8] dark:divide-[#38352F] overflow-hidden">
               {fase.topicos.map((topico) => {
-                const isBloqueado = topico.status === "bloqueado";
-                const isDominado = topico.status === "dominado";
-                const isDisponivel = topico.status === "disponivel";
+                const progressoItem = Object.values(topicoProgresso).find(
+                  (p) => p.topicoSlug === topico.slug
+                );
+                const ipExibido = progressoItem ? progressoItem.ipAtual : topico.ipEstimado;
+                const isDominado = progressoItem?.faseAtual === "concluido" || ipExibido >= 700;
+                const isBloqueado = !isDominado && topico.status === "bloqueado";
+                const isDisponivel = !isDominado && !isBloqueado;
 
                 return (
                   <div
@@ -112,7 +120,7 @@ export default function TrilhaMateriaPage({
 
                         {isDominado && (
                           <span className="text-[11px] text-[#3D6FB4] font-medium">
-                            · dominado ({topico.porcentagemDominio}%)
+                            · dominado ({Math.min(100, Math.round((ipExibido / 1000) * 100))}%)
                           </span>
                         )}
 
@@ -144,7 +152,7 @@ export default function TrilhaMateriaPage({
                           índice
                         </span>
                         <span className="font-serif text-sm text-[#232019] dark:text-[#F1EEE7]">
-                          {topico.ipEstimado}
+                          {ipExibido.toFixed(1).replace(".", ",")}
                         </span>
                       </div>
 

@@ -11,6 +11,7 @@ import {
   calcularProximaRevisaoSM2,
   converterDesempenhoParaQualidadeSM2,
 } from "@/lib/engine/spaced-repetition";
+import { supabase, isSupabaseConfigured } from "@/lib/supabase/client";
 
 export interface UserProfile {
   nome: string;
@@ -29,7 +30,7 @@ export interface TopicProgressState {
   faseAtual: "A" | "T" | "I" | "V" | "O" | "concluido";
   ipAtual: number;
   questoesRespondidas: number;
-  respostasAtivacao: Record<string, string>; // questaoId -> letra
+  respostasAtivacao: Record<string, string>;
   respostasVerificacao: Record<string, string>;
   acertosVerificacao: number;
   totalVerificacao: number;
@@ -85,55 +86,67 @@ interface StudyContextType {
   registrarDistracao: (motivo?: string) => void;
   iniciarModoFortaleza: (contrato: { quando: string; onde: string; oQue: string }, minutos?: number) => void;
   encerrarModoFortaleza: () => void;
+  resetarTudoZerado: () => void;
 }
 
-const STORAGE_KEY = "trilha1000_study_state_v1";
+// Chave limpa zerada v4
+const STORAGE_KEY = "trilha1000_study_state_v4_zeroed";
+const LEGACY_KEYS = [
+  "trilha1000_study_state",
+  "trilha1000_study_state_v1",
+  "trilha1000_study_state_v2",
+  "trilha1000_study_state_v3_clean_zero",
+];
 
-const DEFAULT_PROFILE: UserProfile = {
+const INITIAL_PROFILE: UserProfile = {
   nome: "Matheus",
   cursoAlvo: "Medicina",
   universidadeAlvo: "USP / SISU",
   notaCorteAlvo: 795.5,
   notaAlvo: 815.0,
   dataProva: "2026-11-08",
-  streakDias: 6,
+  streakDias: 0,
   seguroCoringaDisponivel: true,
 };
 
-const DEFAULT_PROFICIENCIA: AreaProficiency = {
-  matematica: 560,
-  natureza: 620,
-  humanas: 685,
-  linguagens: 660,
-  redacao: 760,
+const INITIAL_PROFICIENCIA: AreaProficiency = {
+  matematica: 0,
+  natureza: 0,
+  humanas: 0,
+  linguagens: 0,
+  redacao: 0,
+};
+
+const INITIAL_TOPIC_PROGRESS: Record<string, TopicProgressState> = {
+  "etapa-f1g-01": {
+    etapaId: "etapa-f1g-01",
+    topicoSlug: "funcoes-1-grau",
+    faseAtual: "A",
+    ipAtual: 0,
+    questoesRespondidas: 0,
+    respostasAtivacao: {},
+    respostasVerificacao: {},
+    acertosVerificacao: 0,
+    totalVerificacao: 4,
+    feynmanTexto: "",
+    sm2Data: {
+      repeticoes: 0,
+      intervaloDias: 1,
+      fatorFacilidade: 2.5,
+      proximaRevisao: new Date().toISOString(),
+      ultimaRevisao: new Date().toISOString(),
+    },
+  },
 };
 
 const StudyContext = createContext<StudyContextType | undefined>(undefined);
 
 export function StudyProvider({ children }: { children: ReactNode }) {
-  const [profile, setProfile] = useState<UserProfile>(DEFAULT_PROFILE);
-  const [proficiencias, setProficiencias] = useState<AreaProficiency>(DEFAULT_PROFICIENCIA);
-  const [topicoProgresso, setTopicoProgresso] = useState<Record<string, TopicProgressState>>({
-    "etapa-f1g-01": {
-      etapaId: "etapa-f1g-01",
-      topicoSlug: "funcoes-1-grau",
-      faseAtual: "A",
-      ipAtual: 540,
-      questoesRespondidas: 0,
-      respostasAtivacao: {},
-      respostasVerificacao: {},
-      acertosVerificacao: 0,
-      totalVerificacao: 4,
-      feynmanTexto: "",
-      sm2Data: {
-        repeticoes: 0,
-        intervaloDias: 1,
-        fatorFacilidade: 2.5,
-        proximaRevisao: new Date().toISOString(),
-        ultimaRevisao: new Date().toISOString(),
-      },
-    },
-  });
+  const [profile, setProfile] = useState<UserProfile>(INITIAL_PROFILE);
+  const [proficiencias, setProficiencias] = useState<AreaProficiency>(INITIAL_PROFICIENCIA);
+  const [topicoProgresso, setTopicoProgresso] = useState<Record<string, TopicProgressState>>(
+    INITIAL_TOPIC_PROGRESS
+  );
 
   const [sessaoFoco, setSessaoFoco] = useState<SessaoFoco>({
     ativa: false,
@@ -143,9 +156,16 @@ export function StudyProvider({ children }: { children: ReactNode }) {
     distracoes: [],
   });
 
-  // Carregar do LocalStorage
+  // 1. Carregar estado local ou sincronizar com o Supabase
   useEffect(() => {
     try {
+      // Limpa chaves legadas com mocks antigos
+      LEGACY_KEYS.forEach((k) => {
+        try {
+          localStorage.removeItem(k);
+        } catch (e) {}
+      });
+
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
         const parsed = JSON.parse(saved);
@@ -156,9 +176,59 @@ export function StudyProvider({ children }: { children: ReactNode }) {
     } catch (e) {
       console.error("Erro ao carregar dados locais:", e);
     }
+
+    // Se o Supabase estiver configurado, busca dados salvos no banco
+    if (isSupabaseConfigured && supabase) {
+      const client = supabase;
+      const carregarDadosSupabase = async () => {
+        try {
+          const { data, error } = await client.from("user_progress").select("*");
+          if (!error && data && data.length > 0) {
+            const map: Record<string, TopicProgressState> = {};
+            let maiorMatIP = 0;
+
+            data.forEach((row: any) => {
+              const etapaId = row.etapa_id || "etapa-f1g-01";
+              const ip = Number(row.indice_proficiencia) || 0;
+              maiorMatIP = Math.max(maiorMatIP, ip);
+
+              map[etapaId] = {
+                etapaId,
+                topicoSlug: "funcoes-1-grau",
+                faseAtual: row.fase_ativo_atual || "A",
+                ipAtual: ip,
+                questoesRespondidas: row.questoes_respondidas || 0,
+                respostasAtivacao: {},
+                respostasVerificacao: {},
+                acertosVerificacao: 0,
+                totalVerificacao: 4,
+                feynmanTexto: row.feynman_resposta || "",
+                feynmanAvaliacao: row.feynman_avaliacao,
+                sm2Data: {
+                  repeticoes: row.repeticoes || 0,
+                  intervaloDias: Number(row.intervalo_dias) || 1,
+                  fatorFacilidade: Number(row.fator_facilidade) || 2.5,
+                  proximaRevisao: row.proxima_revisao || new Date().toISOString(),
+                  ultimaRevisao: row.ultima_revisao || new Date().toISOString(),
+                },
+              };
+            });
+
+            setTopicoProgresso((prev) => ({ ...prev, ...map }));
+            if (maiorMatIP > 0) {
+              setProficiencias((prev) => ({ ...prev, matematica: maiorMatIP }));
+            }
+          }
+        } catch (err) {
+          console.warn("Supabase init error:", err);
+        }
+      };
+
+      carregarDadosSupabase();
+    }
   }, []);
 
-  // Salvar no LocalStorage ao alterar
+  // 2. Salvar no LocalStorage a cada alteração
   useEffect(() => {
     try {
       localStorage.setItem(
@@ -173,26 +243,27 @@ export function StudyProvider({ children }: { children: ReactNode }) {
   const notaEstimadaEnem = calcularNotaGlobalEnem(proficiencias);
   const gapParaCorte = Math.max(0, Math.round((profile.notaCorteAlvo - notaEstimadaEnem) * 10) / 10);
 
+  const resetarTudoZerado = () => {
+    setProfile(INITIAL_PROFILE);
+    setProficiencias(INITIAL_PROFICIENCIA);
+    setTopicoProgresso(INITIAL_TOPIC_PROGRESS);
+    setSessaoFoco({
+      ativa: false,
+      tempoRestanteSegundos: 25 * 60,
+      blocoMinutos: 25,
+      modoPausa: false,
+      distracoes: [],
+    });
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (e) {}
+  };
+
   const responderAtivacao = (etapaId: string, questaoId: string, letra: string) => {
     setTopicoProgresso((prev) => {
       const atual = prev[etapaId] || {
+        ...INITIAL_TOPIC_PROGRESS["etapa-f1g-01"],
         etapaId,
-        topicoSlug: "funcoes-1-grau",
-        faseAtual: "A",
-        ipAtual: 540,
-        questoesRespondidas: 0,
-        respostasAtivacao: {},
-        respostasVerificacao: {},
-        acertosVerificacao: 0,
-        totalVerificacao: 4,
-        feynmanTexto: "",
-        sm2Data: {
-          repeticoes: 0,
-          intervaloDias: 1,
-          fatorFacilidade: 2.5,
-          proximaRevisao: new Date().toISOString(),
-          ultimaRevisao: new Date().toISOString(),
-        },
       };
 
       return {
@@ -221,6 +292,27 @@ export function StudyProvider({ children }: { children: ReactNode }) {
         },
       };
     });
+
+    if (isSupabaseConfigured && supabase) {
+      Promise.resolve(
+        supabase
+          .from("user_progress")
+          .upsert(
+            {
+              etapa_id: etapaId,
+              feynman_resposta: texto,
+              feynman_avaliacao: avaliacao || null,
+              fase_ativo_atual: "I",
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: "etapa_id" }
+          )
+      )
+        .then(({ error }) => {
+          if (error) console.warn("Supabase feynman upsert warning:", error.message);
+        })
+        .catch((e: unknown) => console.warn(e));
+    }
   };
 
   const responderVerificacao = (
@@ -232,26 +324,12 @@ export function StudyProvider({ children }: { children: ReactNode }) {
     dificuldade: number
   ) => {
     const atual = topicoProgresso[etapaId] || {
+      ...INITIAL_TOPIC_PROGRESS["etapa-f1g-01"],
       etapaId,
       topicoSlug,
       faseAtual: "V",
-      ipAtual: proficiencias.matematica,
-      questoesRespondidas: 0,
-      respostasAtivacao: {},
-      respostasVerificacao: {},
-      acertosVerificacao: 0,
-      totalVerificacao: 4,
-      feynmanTexto: "",
-      sm2Data: {
-        repeticoes: 0,
-        intervaloDias: 1,
-        fatorFacilidade: 2.5,
-        proximaRevisao: new Date().toISOString(),
-        ultimaRevisao: new Date().toISOString(),
-      },
     };
 
-    // Atualiza IP com o motor Bayesiano / TRI
     const { novoIP, delta } = atualizarIP({
       ipAtual: atual.ipAtual,
       dificuldadeQuestao: dificuldade,
@@ -261,23 +339,51 @@ export function StudyProvider({ children }: { children: ReactNode }) {
 
     const novasRespostas = { ...atual.respostasVerificacao, [questaoId]: letra };
     const novosAcertos = atual.acertosVerificacao + (ehCorreta ? 1 : 0);
+    const questoesTotal = atual.questoesRespondidas + 1;
 
     setTopicoProgresso((prev) => ({
       ...prev,
       [etapaId]: {
         ...atual,
         ipAtual: novoIP,
-        questoesRespondidas: atual.questoesRespondidas + 1,
+        questoesRespondidas: questoesTotal,
         respostasVerificacao: novasRespostas,
         acertosVerificacao: novosAcertos,
       },
     }));
 
-    // Atualiza a proficiência geral de Matemática do perfil
     setProficiencias((prev) => ({
       ...prev,
       matematica: Math.round(novoIP * 10) / 10,
     }));
+
+    // Se o streak for 0, marca 1 dia estudado
+    setProfile((prev) => ({
+      ...prev,
+      streakDias: Math.max(1, prev.streakDias),
+    }));
+
+    // Sincroniza diretamente no Supabase se configurado
+    if (isSupabaseConfigured && supabase) {
+      Promise.resolve(
+        supabase
+          .from("user_progress")
+          .upsert(
+            {
+              etapa_id: etapaId,
+              indice_proficiencia: novoIP,
+              questoes_respondidas: questoesTotal,
+              fase_ativo_atual: "V",
+              updated_at: new Date().toISOString(),
+            },
+            { onConflict: "etapa_id" }
+          )
+      )
+        .then(({ error }) => {
+          if (error) console.warn("Supabase upsert warning:", error.message);
+        })
+        .catch((e: unknown) => console.warn(e));
+    }
 
     return { novoIP, delta };
   };
@@ -313,6 +419,31 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       const { repeticoes, intervaloDias, fatorFacilidade, proximaRevisao } =
         calcularProximaRevisaoSM2(atual.sm2Data, q);
 
+      // Sincroniza conclusão e próximo agendamento no Supabase
+      if (isSupabaseConfigured && supabase) {
+        Promise.resolve(
+          supabase
+            .from("user_progress")
+            .upsert(
+              {
+                etapa_id: etapaId,
+                status: "dominado",
+                fase_ativo_atual: "concluido",
+                proxima_revisao: proximaRevisao.toISOString(),
+                intervalo_dias: intervaloDias,
+                fator_facilidade: fatorFacilidade,
+                repeticoes: repeticoes,
+                updated_at: new Date().toISOString(),
+              },
+              { onConflict: "etapa_id" }
+            )
+        )
+          .then(({ error }) => {
+            if (error) console.warn("Supabase completion warning:", error.message);
+          })
+          .catch((e: unknown) => console.warn(e));
+      }
+
       return {
         ...prev,
         [etapaId]: {
@@ -331,7 +462,7 @@ export function StudyProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const registrarDistracao = (motivo: string = "Distração externa / Notificação") => {
+  const registrarDistracao = (motivo: string = "Distração registrada") => {
     setSessaoFoco((prev) => ({
       ...prev,
       distracoes: [
@@ -356,6 +487,22 @@ export function StudyProvider({ children }: { children: ReactNode }) {
       contratoIntencao: contrato,
       distracoes: [],
     });
+
+    if (isSupabaseConfigured && supabase) {
+      Promise.resolve(
+        supabase
+          .from("sessoes_estudo")
+          .insert({
+            inicio: new Date().toISOString(),
+            duracao_minutos: minutos,
+            contrato_intencao: contrato,
+          })
+      )
+        .then(({ error }) => {
+          if (error) console.warn("Supabase session warning:", error.message);
+        })
+        .catch((e: unknown) => console.warn(e));
+    }
   };
 
   const encerrarModoFortaleza = () => {
@@ -382,6 +529,7 @@ export function StudyProvider({ children }: { children: ReactNode }) {
         registrarDistracao,
         iniciarModoFortaleza,
         encerrarModoFortaleza,
+        resetarTudoZerado,
       }}
     >
       {children}
